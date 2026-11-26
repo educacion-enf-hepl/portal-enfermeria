@@ -14,6 +14,19 @@
   <meta name="apple-mobile-web-app-title" content="Portal HEPL" />
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
+  <!-- ONESIGNAL PUSH -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "ee8e4f17-3c67-4ef3-a0fc-d9f3c0449585",
+        serviceWorkerParam: { scope: "/portal-enfermeria/" },
+        serviceWorkerPath: "/portal-enfermeria/OneSignalSDKWorker.js"
+      });
+    });
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
@@ -691,10 +704,16 @@
     let isPolling = false;
     let knownAnnIds = new Set();
 
-    // ================= PWA / SERVICE WORKER =================
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+    // ================= ONESIGNAL & NOTIFICACIONES =================
+    function syncOneSignalTags() {
+      if (state.role !== "student" || !state.student) return;
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(function(OneSignal) {
+        OneSignal.User.addTags({
+          role: "student",
+          usuario: state.student.usuario,
+          escuela: (state.student.escuela || "").trim()
+        });
       });
     }
 
@@ -709,12 +728,12 @@
     }
 
     async function requestNotificationPermission() {
-      if (!("Notification" in window)) return;
-      const perm = await Notification.requestPermission();
-      updateNotifButton();
-      if (perm === "granted") {
-        triggerSystemNotification("Notificaciones activadas", "Recibirás aquí los avisos de Enseñanza HEPL en vivo.");
-      }
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.Notifications.requestPermission();
+        syncOneSignalTags();
+        updateNotifButton();
+      });
     }
 
     // ================= SESIÓN PERSISTENTE =================
@@ -813,7 +832,6 @@
 
           nuevos.forEach(a => {
             showLiveToast(a.titulo, a.mensaje);
-            triggerSystemNotification(a.titulo, a.mensaje);
           });
         }
       } catch (e) {
@@ -842,23 +860,6 @@
       };
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 9000);
-    }
-
-    async function triggerSystemNotification(titulo, cuerpo) {
-      if (!("Notification" in window) || Notification.permission !== "granted") return;
-      try {
-        const reg = await navigator.serviceWorker?.getRegistration();
-        if (reg) {
-          reg.showNotification(`HEPL · ${titulo}`, {
-            body: cuerpo,
-            icon: "img/icon-192.png",
-            badge: "img/icon-192.png",
-            vibrate: [200, 100, 200]
-          });
-        } else {
-          new Notification(`HEPL · ${titulo}`, { body: cuerpo });
-        }
-      } catch (e) {}
     }
 
     // ================= API & AUTH =================
@@ -952,6 +953,7 @@
       renderAvatar(document.getElementById("topbar-avatar"), state.student.foto, state.student.nombre);
       renderStudentAnnouncements();
       updateNotifButton();
+      syncOneSignalTags();
     }
 
     function openAdminView() {
@@ -1530,7 +1532,6 @@
     showIso("roja");
     initMedSelect();
 
-    // Restaurar sesión automáticamente al abrir la página/app
     window.addEventListener("DOMContentLoaded", restoreSession);
   </script>
 </body>
