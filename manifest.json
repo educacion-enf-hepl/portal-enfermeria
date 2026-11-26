@@ -2,6 +2,7 @@
   "name": "Portal de Enfermería HEPL",
   "short_name": "Portal HEPL",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#17224d",
   "theme_color": "#17224d",
