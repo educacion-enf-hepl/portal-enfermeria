@@ -139,7 +139,7 @@
       background: var(--sky-pill); color: var(--navy-deep);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.85rem;
-      border: 2px solid var(--sky-pill); overflow: hidden;
+      border: 2px solid var(--sky-pill); overflow: hidden; flex-shrink: 0;
     }
     .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
     .user-meta strong { display: block; font-size: 0.86rem; line-height: 1.2; }
@@ -164,7 +164,7 @@
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
-      background: #ffffff; border-radius: 20px; max-width: 500px; width: 100%;
+      background: #ffffff; border-radius: 20px; max-width: 560px; width: 100%;
       padding: 1.75rem; box-shadow: 0 25px 60px rgba(0,0,0,0.35);
       max-height: 90vh; overflow-y: auto;
     }
@@ -183,6 +183,18 @@
     .profile-field { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.65rem 0.9rem; margin-bottom: 0.55rem; }
     .profile-field small { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--royal-blue); }
     .profile-field strong { font-size: 0.92rem; color: var(--text-dark); }
+
+    /* REPORTES / INCIDENCIAS EN MODAL */
+    .reports-box { margin-top: 1.25rem; border-top: 2px solid #e2e8f0; padding-top: 1.15rem; }
+    .reports-box h4 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.92rem; color: var(--navy-deep); text-transform: uppercase; margin-bottom: 0.75rem; }
+    .report-form { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 1rem; margin-bottom: 1rem; }
+    .report-form label { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--navy-deep); margin: 0.5rem 0 0.25rem; }
+    .report-form input, .report-form select, .report-form textarea { width: 100%; padding: 0.6rem 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; background: #fff; }
+    .report-form textarea { min-height: 64px; resize: vertical; }
+    .report-item { background: #f8fafc; border: 1.5px solid #cbd5e1; border-left: 6px solid var(--sky-pill); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 0.65rem; font-size: 0.86rem; }
+    .report-item.supervision { border-left-color: var(--danger); background: #fef2f2; border-color: #fecaca; }
+    .badge-danger { display: inline-block; background: #fee2e2; color: #b91c1c; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.68rem; padding: 0.18rem 0.55rem; border-radius: 999px; text-transform: uppercase; }
+    .badge-ok { display: inline-block; background: #dcfce7; color: #166534; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.68rem; padding: 0.18rem 0.55rem; border-radius: 999px; text-transform: uppercase; }
 
     /* PANEL ADMIN */
     #admin-panel { display: none; min-height: 100vh; background: #f1f5f9; }
@@ -224,7 +236,7 @@
     table.admin-table th { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; text-transform: uppercase; color: var(--royal-blue); background: #f8fafc; }
     .pill-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 800; background: #e0f2fe; color: var(--navy-deep); }
 
-    /* ANUNCIOS (ESTUDIANTE) */
+    /* ANUNCIOS (ESTUDIANTE) Y LISTA DE ESTUDIANTES (ASESOR) */
     .announcements-section { background-color: #ffffff; padding: 0.5rem 1.5rem 2rem; }
     .ann-header-row {
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
@@ -348,7 +360,7 @@
       <span class="lock-badge">ACCESO RESTRINGIDO · HEPL</span>
       <h2>Portal de Practicantes y Pasantes de Enfermería · HEPL</h2>
       <p>Ingresa con el usuario y contraseña asignados por el Departamento de Enseñanza e Investigación.</p>
-      <input type="text" id="login-user" class="lock-input" placeholder="Usuario (ej. ESTHEPL...)" autocomplete="username" />
+      <input type="text" id="login-user" class="lock-input" placeholder="Usuario (ej. ESTHEPL... o ASEHEPL...)" autocomplete="username" />
       <input type="password" id="login-pass" class="lock-input" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()" />
       <button id="login-btn" class="lock-btn" onclick="handleLogin()">Iniciar Sesión</button>
       <p id="lock-error" class="lock-error"></p>
@@ -370,7 +382,8 @@
 
     <div class="admin-container">
       <div class="admin-tabs">
-        <button class="admin-tab-btn active" onclick="switchAdminTab('students', this)">Estudiantes y Accesos</button>
+        <button class="admin-tab-btn active" onclick="switchAdminTab('students', this)">Estudiantes y Reportes</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('asesores', this)">Docentes / Asesores</button>
         <button class="admin-tab-btn" onclick="switchAdminTab('announcements', this)">Anuncios y Avisos</button>
         <button class="admin-tab-btn" onclick="switchAdminTab('content', this)">Editar Contenidos</button>
       </div>
@@ -398,14 +411,39 @@
           <input type="text" id="search-student" placeholder="Buscar por nombre, usuario, escuela o CURP..." oninput="renderStudentsTable()" style="margin-bottom:1rem;" />
           <div class="table-wrap">
             <table class="admin-table">
-              <thead><tr><th>Estudiante</th><th>Usuario</th><th>Perfil</th><th>Escuela</th><th>Acciones</th></tr></thead>
+              <thead><tr><th>Estudiante</th><th>Usuario</th><th>Perfil</th><th>Escuela</th><th>Reportes</th><th>Acciones</th></tr></thead>
               <tbody id="students-tbody"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 2: ANUNCIOS -->
+      <!-- TAB 2: DOCENTES / ASESORES -->
+      <div id="admin-tab-asesores" class="admin-section">
+        <div class="admin-card">
+          <h3>Registrar Nuevo Docente / Asesor</h3>
+          <div class="admin-grid-form">
+            <div><label>Nombre completo</label><input type="text" id="ase-nombre" placeholder="Ej. Mtra. Laura Gómez" /></div>
+            <div><label>Correo electrónico</label><input type="email" id="ase-correo" placeholder="asesor@universidad.edu.mx" /></div>
+            <div><label>Escuela / Universidad</label><input type="text" id="ase-escuela" placeholder="Debe coincidir con la de sus estudiantes" /></div>
+          </div>
+          <button id="btn-register-asesor" class="btn-primary" onclick="registerAsesor()">Registrar Asesor y Enviar Accesos</button>
+          <div id="ase-cred-alert" class="cred-alert"></div>
+        </div>
+
+        <div class="admin-card">
+          <h3>Docentes / Asesores Registrados (<span id="asesores-count">0</span>)</h3>
+          <input type="text" id="search-asesor" placeholder="Buscar por nombre, usuario o escuela..." oninput="renderAsesoresTable()" style="margin-bottom:1rem;" />
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Docente / Asesor</th><th>Usuario</th><th>Escuela Asignada</th><th>Acciones</th></tr></thead>
+              <tbody id="asesores-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ANUNCIOS -->
       <div id="admin-tab-announcements" class="admin-section">
         <div class="admin-card">
           <h3>Publicar Nuevo Anuncio / Sesión</h3>
@@ -449,7 +487,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: EDITAR CONTENIDOS -->
+      <!-- TAB 4: EDITAR CONTENIDOS -->
       <div id="admin-tab-content" class="admin-section">
         <div class="admin-card">
           <h3>Mensaje de Bienvenida y "Este Manual es para ti"</h3>
@@ -492,7 +530,7 @@
     </div>
   </div>
 
-  <!-- 3. PORTAL (ESTUDIANTES / VISTA PREVIA) -->
+  <!-- 3. PORTAL (ESTUDIANTES / ASESORES / VISTA PREVIA) -->
   <div id="app-content">
     <div class="user-topbar">
       <div class="user-chip">
@@ -530,7 +568,7 @@
       </div>
     </section>
 
-    <!-- SECCIÓN DE ANUNCIOS PARA ESTUDIANTES -->
+    <!-- SECCIÓN DE ANUNCIOS (SOLO ESTUDIANTES) -->
     <section id="student-announcements-section" class="announcements-section" style="display:none;">
       <div class="section-inner">
         <div class="ann-header-row">
@@ -538,6 +576,23 @@
           <span id="student-ann-pending-badge" class="pill-tag"></span>
         </div>
         <div id="student-ann-list"></div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE ESTUDIANTES (SOLO DOCENTES / ASESORES) -->
+    <section id="asesor-students-section" class="announcements-section" style="display:none;">
+      <div class="section-inner">
+        <div class="ann-header-row">
+          <h3>Mis Estudiantes · <span id="asesor-school-title"></span></h3>
+          <span id="asesor-students-count-badge" class="pill-tag">0 estudiantes</span>
+        </div>
+        <input type="text" id="search-asesor-student" placeholder="Buscar estudiante por nombre, usuario o perfil..." oninput="renderAsesorStudents()" style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #cbd5e1; border-radius:10px; margin-bottom:1rem; font-family:'Inter',sans-serif;" />
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Estudiante</th><th>Usuario</th><th>Perfil</th><th>Reportes / Incidencias</th><th>Acción</th></tr></thead>
+            <tbody id="asesor-students-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -665,7 +720,7 @@
     </footer>
   </div>
 
-  <!-- MODAL GENÉRICO (PERFIL / CONFIRMACIONES) -->
+  <!-- MODAL GENÉRICO (PERFIL / REPORTES / CONFIRMACIONES) -->
   <div id="profile-modal" class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
@@ -681,12 +736,13 @@
         </div>
       </div>
       <div id="modal-profile-fields"></div>
+      <div id="modal-reports-section" class="reports-box" style="display:none;"></div>
     </div>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzrYDbamUAWp1l-W6Ir5GQCFB3n4cE7Wd16eBhB3XCbo_ZuBkcp-WgMIpHUI6dnn-yo/exec";
-    const SESSION_KEY = "hepl_portal_session_v1";
+    const SESSION_KEY = "hepl_portal_session_v2";
 
     const CORE_MODULES = [
       { key: "seguridad", label: "Seguridad" },
@@ -696,23 +752,28 @@
     ];
 
     let state = {
-      role: null, creds: null, student: null, students: [],
+      role: null, creds: null, student: null, asesor: null,
+      students: [], asesores: [], reports: [],
       config: {}, customModules: [], announcements: []
     };
 
     let livePollTimer = null;
     let isPolling = false;
     let knownAnnIds = new Set();
+    let knownRepIds = new Set();
 
     // ================= ONESIGNAL & NOTIFICACIONES =================
     function syncOneSignalTags() {
-      if (state.role !== "student" || !state.student) return;
+      if (state.role !== "student" && state.role !== "asesor") return;
+      const person = state.role === "student" ? state.student : state.asesor;
+      if (!person) return;
+
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(function(OneSignal) {
         OneSignal.User.addTags({
-          role: "student",
-          usuario: state.student.usuario,
-          escuela: (state.student.escuela || "").trim()
+          role: state.role,
+          usuario: (person.usuario || "").trim().toUpperCase(),
+          escuela: (person.escuela || "").trim().toUpperCase()
         });
       });
     }
@@ -720,7 +781,7 @@
     function updateNotifButton() {
       const btn = document.getElementById("btn-enable-notif");
       if (!btn) return;
-      if (state.role === "student" && "Notification" in window && Notification.permission === "default") {
+      if ((state.role === "student" || state.role === "asesor") && "Notification" in window && Notification.permission === "default") {
         btn.style.display = "inline-block";
       } else {
         btn.style.display = "none";
@@ -738,17 +799,7 @@
 
     // ================= SESIÓN PERSISTENTE =================
     function saveSession() {
-      try {
-        localStorage.setItem(SESSION_KEY, JSON.stringify({
-          role: state.role,
-          creds: state.creds,
-          student: state.student,
-          students: state.students,
-          config: state.config,
-          customModules: state.customModules,
-          announcements: state.announcements
-        }));
-      } catch (e) {}
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(state)); } catch (e) {}
     }
 
     async function restoreSession() {
@@ -761,34 +812,38 @@
 
         state = { ...state, ...saved };
         knownAnnIds = new Set((state.announcements || []).map(a => a.id));
+        knownRepIds = new Set((state.reports || []).map(r => r.id));
         document.getElementById("lock-screen").style.display = "none";
         applyDynamicContent();
 
-        if (state.role === "admin") {
-          openAdminView();
-        } else {
-          openStudentView();
-          startLiveAnnouncements();
-        }
+        if (state.role === "admin") openAdminView();
+        else if (state.role === "asesor") { openAsesorView(); startLivePolling(); }
+        else { openStudentView(); startLivePolling(); }
 
-        // Sincronizar en segundo plano sin cerrar sesión si falla la red
         const res = await callAPI({ action: "login", user: state.creds.user, pass: state.creds.pass });
-        if (!res.ok) {
-          logout();
-          return;
-        }
+        if (!res.ok) { logout(); return; }
 
         state.config = res.config || {};
         state.customModules = res.customModules || [];
-        state.announcements = res.announcements || [];
-        knownAnnIds = new Set(state.announcements.map(a => a.id));
 
         if (res.role === "admin") {
           state.students = res.students || [];
+          state.asesores = res.asesores || [];
+          state.reports = res.reports || [];
+          state.announcements = res.announcements || [];
           renderStudentsTable();
+          renderAsesoresTable();
           renderAdminAnnouncements();
+        } else if (res.role === "asesor") {
+          state.asesor = res.asesor;
+          state.students = res.students || [];
+          state.reports = res.reports || [];
+          knownRepIds = new Set(state.reports.map(r => r.id));
+          renderAsesorStudents();
         } else {
           state.student = res.student;
+          state.announcements = res.announcements || [];
+          knownAnnIds = new Set(state.announcements.map(a => a.id));
           renderStudentAnnouncements();
         }
         applyDynamicContent();
@@ -798,50 +853,55 @@
       }
     }
 
-    // ================= NOTIFICACIONES EN VIVO =================
-    function startLiveAnnouncements() {
+    // ================= ACTUALIZACIÓN EN VIVO =================
+    function startLivePolling() {
       if (livePollTimer) clearInterval(livePollTimer);
-      livePollTimer = setInterval(checkLiveAnnouncements, 25000);
+      livePollTimer = setInterval(checkLiveUpdates, 25000);
     }
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && state.role === "student") {
-        checkLiveAnnouncements();
+      if (document.visibilityState === "visible" && (state.role === "student" || state.role === "asesor")) {
+        checkLiveUpdates();
       }
     });
 
-    async function checkLiveAnnouncements() {
-      if (isPolling || state.role !== "student" || !state.creds) return;
+    async function checkLiveUpdates() {
+      if (isPolling || !state.creds || (state.role !== "student" && state.role !== "asesor")) return;
       isPolling = true;
       try {
-        const res = await callAPI({
-          action: "login",
-          user: state.creds.user,
-          pass: state.creds.pass
-        });
+        const res = await callAPI({ action: "login", user: state.creds.user, pass: state.creds.pass });
         if (!res.ok) return;
 
-        const incoming = res.announcements || [];
-        const nuevos = incoming.filter(a => !knownAnnIds.has(a.id));
-
-        if (nuevos.length > 0) {
-          nuevos.forEach(a => knownAnnIds.add(a.id));
-          state.announcements = incoming;
-          saveSession();
-          renderStudentAnnouncements();
-
-          nuevos.forEach(a => {
-            showLiveToast(a.titulo, a.mensaje);
-          });
+        if (state.role === "student") {
+          const incoming = res.announcements || [];
+          const nuevos = incoming.filter(a => !knownAnnIds.has(a.id));
+          if (nuevos.length > 0) {
+            nuevos.forEach(a => knownAnnIds.add(a.id));
+            state.announcements = incoming;
+            saveSession();
+            renderStudentAnnouncements();
+            nuevos.forEach(a => showLiveToast("Nuevo Aviso · Enseñanza HEPL", a.titulo, a.mensaje, "student-announcements-section"));
+          }
+        } else if (state.role === "asesor") {
+          const incomingRep = res.reports || [];
+          const nuevosRep = incomingRep.filter(r => !knownRepIds.has(r.id));
+          state.students = res.students || [];
+          state.reports = incomingRep;
+          if (nuevosRep.length > 0) {
+            nuevosRep.forEach(r => knownRepIds.add(r.id));
+            saveSession();
+            renderAsesorStudents();
+            nuevosRep.forEach(r => {
+              if (r.requiere_supervision === "Sí") {
+                showLiveToast("Revisión Requerida · HEPL", "Un Estudiante Ha Recibido Un Reporte/Incidencia y Requiere Revisarlo", `${r.tipo}: ${r.motivo}`, "asesor-students-section");
+              }
+            });
+          }
         }
-      } catch (e) {
-        // Silencioso si falla la señal
-      } finally {
-        isPolling = false;
-      }
+      } catch (e) {} finally { isPolling = false; }
     }
 
-    function showLiveToast(titulo, mensaje) {
+    function showLiveToast(badge, titulo, mensaje, targetSectionId) {
       const toast = document.createElement("div");
       toast.style.cssText = `
         position:fixed; top:16px; right:16px; left:16px; max-width:420px; margin:0 auto;
@@ -850,16 +910,16 @@
         cursor:pointer; font-family:'Inter',sans-serif;
       `;
       toast.innerHTML = `
-        <div style="font-family:'Montserrat',sans-serif; font-size:0.72rem; color:#38b6ff; font-weight:900; text-transform:uppercase;">Nuevo Aviso · Enseñanza HEPL</div>
+        <div style="font-family:'Montserrat',sans-serif; font-size:0.72rem; color:#38b6ff; font-weight:900; text-transform:uppercase;">${badge}</div>
         <strong style="display:block; font-size:0.95rem; margin:0.2rem 0;">${titulo}</strong>
         <div style="font-size:0.84rem; opacity:0.9; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${mensaje}</div>
       `;
       toast.onclick = () => {
         toast.remove();
-        document.getElementById("student-announcements-section").scrollIntoView({ behavior: "smooth" });
+        document.getElementById(targetSectionId)?.scrollIntoView({ behavior: "smooth" });
       };
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 9000);
+      setTimeout(() => toast.remove(), 10000);
     }
 
     // ================= API & AUTH =================
@@ -894,8 +954,7 @@
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = "Verificando...";
+      btn.disabled = true; btn.textContent = "Verificando...";
       try {
         const res = await callAPI({ action: "login", user, pass });
         if (!res.ok) {
@@ -908,35 +967,44 @@
         state.creds = { user, pass };
         state.config = res.config || {};
         state.customModules = res.customModules || [];
-        state.announcements = res.announcements || [];
-        knownAnnIds = new Set(state.announcements.map(a => a.id));
 
         document.getElementById("lock-screen").style.display = "none";
         applyDynamicContent();
 
         if (res.role === "admin") {
           state.students = res.students || [];
+          state.asesores = res.asesores || [];
+          state.reports = res.reports || [];
+          state.announcements = res.announcements || [];
           openAdminView();
+        } else if (res.role === "asesor") {
+          state.asesor = res.asesor;
+          state.students = res.students || [];
+          state.reports = res.reports || [];
+          knownRepIds = new Set(state.reports.map(r => r.id));
+          openAsesorView();
+          startLivePolling();
         } else {
           state.student = res.student;
+          state.announcements = res.announcements || [];
+          knownAnnIds = new Set(state.announcements.map(a => a.id));
           openStudentView();
-          startLiveAnnouncements();
+          startLivePolling();
         }
         saveSession();
       } catch (err) {
         errEl.textContent = err.message;
         errEl.style.display = "block";
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Iniciar Sesión";
+        btn.disabled = false; btn.textContent = "Iniciar Sesión";
       }
     }
 
     function logout() {
       localStorage.removeItem(SESSION_KEY);
       if (livePollTimer) { clearInterval(livePollTimer); livePollTimer = null; }
-      knownAnnIds.clear();
-      state = { role: null, creds: null, student: null, students: [], config: {}, customModules: [], announcements: [] };
+      knownAnnIds.clear(); knownRepIds.clear();
+      state = { role: null, creds: null, student: null, asesor: null, students: [], asesores: [], reports: [], config: {}, customModules: [], announcements: [] };
       document.getElementById("admin-panel").style.display = "none";
       document.getElementById("app-content").style.display = "none";
       document.getElementById("login-pass").value = "";
@@ -946,6 +1014,7 @@
     function openStudentView() {
       document.getElementById("admin-panel").style.display = "none";
       document.getElementById("app-content").style.display = "block";
+      document.getElementById("asesor-students-section").style.display = "none";
       document.getElementById("btn-open-profile").style.display = "inline-block";
       document.getElementById("btn-return-admin").style.display = "none";
       document.getElementById("topbar-name").textContent = state.student.nombre;
@@ -956,10 +1025,27 @@
       syncOneSignalTags();
     }
 
+    function openAsesorView() {
+      document.getElementById("admin-panel").style.display = "none";
+      document.getElementById("app-content").style.display = "block";
+      document.getElementById("student-announcements-section").style.display = "none";
+      document.getElementById("btn-jump-ann").style.display = "none";
+      document.getElementById("asesor-students-section").style.display = "block";
+      document.getElementById("btn-open-profile").style.display = "inline-block";
+      document.getElementById("btn-return-admin").style.display = "none";
+      document.getElementById("topbar-name").textContent = state.asesor.nombre;
+      document.getElementById("topbar-role").textContent = `Docente / Asesor · ${state.asesor.escuela}`;
+      renderAvatar(document.getElementById("topbar-avatar"), state.asesor.foto, state.asesor.nombre);
+      renderAsesorStudents();
+      updateNotifButton();
+      syncOneSignalTags();
+    }
+
     function openAdminView() {
       document.getElementById("app-content").style.display = "none";
       document.getElementById("admin-panel").style.display = "block";
       renderStudentsTable();
+      renderAsesoresTable();
       renderAdminAnnouncements();
       populateAdminConfigForm();
       renderAdminCustomModules();
@@ -972,6 +1058,7 @@
       document.getElementById("btn-enable-notif").style.display = "none";
       document.getElementById("btn-jump-ann").style.display = "none";
       document.getElementById("student-announcements-section").style.display = "none";
+      document.getElementById("asesor-students-section").style.display = "none";
       document.getElementById("btn-return-admin").style.display = "inline-block";
       document.getElementById("topbar-name").textContent = "Vista Previa (Administrador)";
       document.getElementById("topbar-role").textContent = "Dpto. de Enseñanza e Investigación";
@@ -979,6 +1066,48 @@
     }
 
     function returnToAdmin() { openAdminView(); }
+
+    // ================= VISTA ASESOR: MIS ESTUDIANTES =================
+    function renderAsesorStudents() {
+      document.getElementById("asesor-school-title").textContent = state.asesor?.escuela || "";
+      document.getElementById("asesor-students-count-badge").textContent = `${state.students.length} estudiante${state.students.length === 1 ? "" : "s"}`;
+
+      const q = (document.getElementById("search-asesor-student").value || "").toLowerCase();
+      const filtered = state.students.filter(s =>
+        s.nombre.toLowerCase().includes(q) ||
+        s.usuario.toLowerCase().includes(q) ||
+        s.perfil.toLowerCase().includes(q)
+      );
+
+      const tbody = document.getElementById("asesor-students-tbody");
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:1.2rem;">No hay estudiantes registrados en esta escuela todavía.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => {
+        const reps = state.reports.filter(r => r.usuario_estudiante === s.usuario);
+        const hasSup = reps.some(r => r.requiere_supervision === "Sí");
+        const repBadge = reps.length === 0
+          ? `<span class="badge-ok">0 reportes</span>`
+          : `<span class="${hasSup ? "badge-danger" : "pill-tag"}">${reps.length} reporte${reps.length > 1 ? "s" : ""}${hasSup ? " · Supervisión" : ""}</span>`;
+
+        return `
+          <tr>
+            <td><div style="display:flex; align-items:center; gap:0.6rem;"><div class="avatar-sm" style="width:32px; height:32px; font-size:0.72rem;">${s.foto ? `<img src="${s.foto}" />` : getInitials(s.nombre)}</div><div><strong>${s.nombre}</strong><br><small style="color:var(--text-muted);">${s.correo}</small></div></div></td>
+            <td><strong>${s.usuario}</strong></td>
+            <td><span class="pill-tag">${s.perfil}</span></td>
+            <td>${repBadge}</td>
+            <td><button class="btn-sm btn-info" onclick="viewStudentProfileAsesor('${s.usuario}')">Ver Perfil y Reportes</button></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function viewStudentProfileAsesor(usuario) {
+      const s = state.students.find(x => x.usuario === usuario);
+      if (s) showProfileModal(s, false, false, true);
+    }
 
     // ================= ANUNCIOS (ESTUDIANTE) =================
     function renderStudentAnnouncements() {
@@ -988,9 +1117,7 @@
       const badgeEl = document.getElementById("student-ann-pending-badge");
 
       if (!state.announcements.length) {
-        sec.style.display = "none";
-        jumpBtn.style.display = "none";
-        return;
+        sec.style.display = "none"; jumpBtn.style.display = "none"; return;
       }
 
       sec.style.display = "block";
@@ -1012,17 +1139,11 @@
 
         return `
           <div class="${cardClass}">
-            <div class="ann-top">
-              <h4>${a.titulo}</h4>
-              <span class="ann-date">${a.fecha}</span>
-            </div>
+            <div class="ann-top"><h4>${a.titulo}</h4><span class="ann-date">${a.fecha}</span></div>
             <div class="ann-msg">${a.mensaje}</div>
             <div class="ann-footer">
               <span class="pill-tag" style="background:#e2e8f0;">${isAsist ? "Sesión / Capacitación" : "Aviso Informativo"}</span>
-              ${a.confirmado
-                ? `<span class="badge-confirmed">${doneText}</span>`
-                : `<button class="btn-confirm-ann" onclick="confirmAnnouncement('${a.id}', this)">${btnText}</button>`
-              }
+              ${a.confirmado ? `<span class="badge-confirmed">${doneText}</span>` : `<button class="btn-confirm-ann" onclick="confirmAnnouncement('${a.id}', this)">${btnText}</button>`}
             </div>
           </div>
         `;
@@ -1030,15 +1151,11 @@
     }
 
     async function confirmAnnouncement(id, btn) {
-      btn.disabled = true;
-      btn.textContent = "Guardando...";
+      btn.disabled = true; btn.textContent = "Guardando...";
       try {
         const res = await callAPI({ action: "confirm_announcement", user: state.creds.user, pass: state.creds.pass, id });
-        if (res.ok) {
-          state.announcements = res.announcements || [];
-          saveSession();
-          renderStudentAnnouncements();
-        } else { alert(res.error || "No se pudo confirmar."); btn.disabled = false; }
+        if (res.ok) { state.announcements = res.announcements || []; saveSession(); renderStudentAnnouncements(); }
+        else { alert(res.error || "No se pudo confirmar."); btn.disabled = false; }
       } catch (err) { alert("Error de conexión."); btn.disabled = false; }
     }
 
@@ -1122,6 +1239,7 @@
       if (!a) return;
       document.getElementById("modal-profile-title").textContent = a.tipo === "asistencia" ? "Asistencia Confirmada" : "Confirmados de Leído";
       document.getElementById("modal-avatar-section").style.display = "none";
+      document.getElementById("modal-reports-section").style.display = "none";
       const list = a.confirmaciones || [];
       document.getElementById("modal-profile-fields").innerHTML = list.length
         ? list.map(c => `<div class="profile-field"><small>${c.fecha} · ${c.perfil || ""} · ${c.escuela || ""}</small><strong>${c.nombre} (${c.usuario})</strong></div>`).join("")
@@ -1137,28 +1255,146 @@
       } catch (err) { alert("Error: " + err.message); }
     }
 
-    // ================= PERFIL ESTUDIANTE Y FOTO =================
-    function openMyProfile() { showProfileModal(state.student, true); }
-    function viewStudentProfileAdmin(usuario) {
-      const s = state.students.find(x => x.usuario === usuario);
-      if (s) showProfileModal(s, false);
+    // ================= PERFIL Y REPORTES / INCIDENCIAS =================
+    function openMyProfile() {
+      if (state.role === "asesor") {
+        showProfileModal({ ...state.asesor, perfil: "Docente / Asesor" }, true, false, false);
+      } else {
+        showProfileModal(state.student, true, false, false);
+      }
     }
 
-    function showProfileModal(s, canEditPhoto) {
-      document.getElementById("modal-profile-title").textContent = canEditPhoto ? "Mi Perfil" : "Perfil del Estudiante";
+    function viewStudentProfileAdmin(usuario) {
+      const s = state.students.find(x => x.usuario === usuario);
+      if (s) showProfileModal(s, false, true, true);
+    }
+
+    function viewAsesorProfileAdmin(usuario) {
+      const a = state.asesores.find(x => x.usuario === usuario);
+      if (a) showProfileModal({ ...a, perfil: "Docente / Asesor" }, false, false, false);
+    }
+
+    function showProfileModal(s, canEditPhoto, canAddReport, showReports) {
+      document.getElementById("modal-profile-title").textContent = canEditPhoto ? "Mi Perfil" : "Perfil";
       document.getElementById("modal-avatar-section").style.display = "flex";
       renderAvatar(document.getElementById("modal-avatar"), s.foto, s.nombre);
       document.getElementById("photo-upload-wrap").style.display = canEditPhoto ? "block" : "none";
       document.getElementById("photo-status").textContent = "";
 
       const fields = [
-        { l: "Nombre completo", v: s.nombre }, { l: "Usuario", v: s.usuario },
-        { l: "Perfil", v: s.perfil }, { l: "Escuela / Universidad", v: s.escuela },
-        { l: "Correo electrónico", v: s.correo }, { l: "CURP", v: s.curp }
+        { l: "Nombre completo", v: s.nombre },
+        { l: "Usuario", v: s.usuario },
+        { l: "Perfil", v: s.perfil },
+        { l: "Escuela / Universidad", v: s.escuela },
+        { l: "Correo electrónico", v: s.correo }
       ];
+      if (s.curp) fields.push({ l: "CURP", v: s.curp });
       if (!canEditPhoto && s.password) fields.push({ l: "Contraseña asignada", v: s.password });
+
       document.getElementById("modal-profile-fields").innerHTML = fields.map(f => `<div class="profile-field"><small>${f.l}</small><strong>${f.v}</strong></div>`).join("");
+
+      const repSec = document.getElementById("modal-reports-section");
+      if (showReports) {
+        repSec.style.display = "block";
+        renderReportsInModal(s, canAddReport);
+      } else {
+        repSec.style.display = "none";
+      }
+
       document.getElementById("profile-modal").classList.add("open");
+    }
+
+    function renderReportsInModal(student, canAddReport) {
+      const repSec = document.getElementById("modal-reports-section");
+      const reps = state.reports.filter(r => r.usuario_estudiante === student.usuario);
+
+      let formHtml = "";
+      if (canAddReport) {
+        formHtml = `
+          <div class="report-form">
+            <strong style="font-family:'Montserrat',sans-serif; font-size:0.8rem; color:var(--navy-deep); text-transform:uppercase;">Agregar Reporte o Incidencia</strong>
+            <label>Tipo</label>
+            <select id="rep-tipo"><option value="Reporte">Reporte</option><option value="Incidencia">Incidencia</option></select>
+            <label>Motivo</label>
+            <textarea id="rep-motivo" placeholder="Describe el motivo del reporte o incidencia..."></textarea>
+            <label>Acción tomada</label>
+            <textarea id="rep-accion" placeholder="Describe la acción o indicación aplicada..."></textarea>
+            <label>¿Requiere supervisión en Enseñanza? (Notifica al Asesor)</label>
+            <select id="rep-supervision"><option value="No">No</option><option value="Sí">Sí (Notificar al Asesor para acudir a Enseñanza)</option></select>
+            <button id="btn-save-report" class="btn-primary" style="margin-top:0.8rem; width:100%;" onclick="addStudentReport('${student.usuario}')">Guardar Reporte / Incidencia</button>
+          </div>
+        `;
+      }
+
+      const listHtml = reps.length
+        ? reps.map(r => `
+            <div class="report-item ${r.requiere_supervision === "Sí" ? "supervision" : ""}">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.35rem;">
+                <div>
+                  <strong style="color:var(--navy-deep);">${r.tipo}</strong>
+                  <span style="font-size:0.74rem; color:var(--text-muted);"> · ${r.fecha}</span>
+                </div>
+                <div style="display:flex; gap:0.35rem; align-items:center;">
+                  ${r.requiere_supervision === "Sí" ? `<span class="badge-danger">Requiere Supervisión</span>` : `<span class="badge-ok">Sin supervisión</span>`}
+                  ${canAddReport ? `<button class="btn-sm btn-del" onclick="deleteStudentReport('${r.id}', '${student.usuario}')">✕</button>` : ""}
+                </div>
+              </div>
+              <div><strong>Motivo:</strong> ${r.motivo}</div>
+              <div><strong>Acción:</strong> ${r.accion}</div>
+            </div>
+          `).join("")
+        : `<p style="font-size:0.86rem; color:var(--text-muted); text-align:center; padding:0.6rem 0;">Este estudiante no tiene reportes ni incidencias registradas.</p>`;
+
+      repSec.innerHTML = `<h4>Reportes e Incidencias (${reps.length})</h4>${formHtml}${listHtml}`;
+    }
+
+    async function addStudentReport(usuario) {
+      const student = state.students.find(s => s.usuario === usuario);
+      if (!student) return;
+      const tipo = document.getElementById("rep-tipo").value;
+      const motivo = document.getElementById("rep-motivo").value.trim();
+      const accion = document.getElementById("rep-accion").value.trim();
+      const requiere_supervision = document.getElementById("rep-supervision").value;
+      const btn = document.getElementById("btn-save-report");
+
+      if (!motivo || !accion) { alert("Completa el motivo y la acción."); return; }
+
+      btn.disabled = true; btn.textContent = "Guardando...";
+      try {
+        const res = await callAPI({
+          action: "add_report",
+          adminAuth: state.creds,
+          report: {
+            usuario_estudiante: student.usuario,
+            nombre_estudiante: student.nombre,
+            escuela: student.escuela,
+            tipo, motivo, accion, requiere_supervision
+          }
+        });
+        if (!res.ok) { alert(res.error || "No se pudo guardar."); return; }
+        state.reports = res.reports || [];
+        saveSession();
+        renderStudentsTable();
+        renderReportsInModal(student, true);
+        if (requiere_supervision === "Sí") {
+          alert(`Reporte guardado. Se envió notificación al asesor de ${student.escuela}.`);
+        }
+      } catch (err) { alert("Error: " + err.message); }
+      finally { if (btn) { btn.disabled = false; btn.textContent = "Guardar Reporte / Incidencia"; } }
+    }
+
+    async function deleteStudentReport(id, usuario) {
+      if (!confirm("¿Eliminar este reporte/incidencia?")) return;
+      try {
+        const res = await callAPI({ action: "delete_report", adminAuth: state.creds, id });
+        if (res.ok) {
+          state.reports = res.reports || [];
+          saveSession();
+          renderStudentsTable();
+          const student = state.students.find(s => s.usuario === usuario);
+          if (student) renderReportsInModal(student, true);
+        }
+      } catch (err) { alert("Error: " + err.message); }
     }
 
     function closeProfileModal() { document.getElementById("profile-modal").classList.remove("open"); }
@@ -1182,10 +1418,11 @@
           try {
             const res = await callAPI({ action: "update_photo", user: state.creds.user, pass: state.creds.pass, foto: dataUrl });
             if (res.ok) {
-              state.student.foto = dataUrl;
+              const person = state.role === "asesor" ? state.asesor : state.student;
+              person.foto = dataUrl;
               saveSession();
-              renderAvatar(document.getElementById("modal-avatar"), dataUrl, state.student.nombre);
-              renderAvatar(document.getElementById("topbar-avatar"), dataUrl, state.student.nombre);
+              renderAvatar(document.getElementById("modal-avatar"), dataUrl, person.nombre);
+              renderAvatar(document.getElementById("topbar-avatar"), dataUrl, person.nombre);
               status.textContent = "Foto actualizada correctamente.";
             } else { status.textContent = res.error || "Error al guardar foto."; }
           } catch (err) { status.textContent = "Error de conexión."; }
@@ -1195,7 +1432,7 @@
       reader.readAsDataURL(file);
     }
 
-    // ================= ADMIN: ESTUDIANTES Y CONTENIDO =================
+    // ================= ADMIN: ESTUDIANTES, ASESORES Y CONTENIDO =================
     function switchAdminTab(tab, btn) {
       document.querySelectorAll(".admin-tab-btn").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".admin-section").forEach(s => s.classList.remove("active"));
@@ -1236,16 +1473,22 @@
       const filtered = state.students.filter(s => s.nombre.toLowerCase().includes(q) || s.usuario.toLowerCase().includes(q) || s.escuela.toLowerCase().includes(q) || s.curp.toLowerCase().includes(q));
       document.getElementById("students-count").textContent = state.students.length;
       const tbody = document.getElementById("students-tbody");
-      if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:1.2rem;">No hay estudiantes registrados que coincidan.</td></tr>`; return; }
-      tbody.innerHTML = filtered.map(s => `
-        <tr>
-          <td><div style="display:flex; align-items:center; gap:0.6rem;"><div class="avatar-sm" style="width:32px; height:32px; font-size:0.72rem;">${s.foto ? `<img src="${s.foto}" />` : getInitials(s.nombre)}</div><div><strong>${s.nombre}</strong><br><small style="color:var(--text-muted);">${s.correo}</small></div></div></td>
-          <td><strong>${s.usuario}</strong></td>
-          <td><span class="pill-tag">${s.perfil}</span></td>
-          <td>${s.escuela}</td>
-          <td style="display:flex; gap:0.4rem; flex-wrap:wrap;"><button class="btn-sm btn-info" onclick="viewStudentProfileAdmin('${s.usuario}')">Ver Perfil</button><button class="btn-sm btn-del" onclick="deleteStudent('${s.usuario}', '${s.nombre.replace(/'/g, "")}')">Dar de Baja</button></td>
-        </tr>
-      `).join("");
+      if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:1.2rem;">No hay estudiantes registrados que coincidan.</td></tr>`; return; }
+      tbody.innerHTML = filtered.map(s => {
+        const reps = state.reports.filter(r => r.usuario_estudiante === s.usuario);
+        const hasSup = reps.some(r => r.requiere_supervision === "Sí");
+        const repBadge = reps.length === 0 ? `<span class="badge-ok">0</span>` : `<span class="${hasSup ? "badge-danger" : "pill-tag"}">${reps.length}</span>`;
+        return `
+          <tr>
+            <td><div style="display:flex; align-items:center; gap:0.6rem;"><div class="avatar-sm" style="width:32px; height:32px; font-size:0.72rem;">${s.foto ? `<img src="${s.foto}" />` : getInitials(s.nombre)}</div><div><strong>${s.nombre}</strong><br><small style="color:var(--text-muted);">${s.correo}</small></div></div></td>
+            <td><strong>${s.usuario}</strong></td>
+            <td><span class="pill-tag">${s.perfil}</span></td>
+            <td>${s.escuela}</td>
+            <td>${repBadge}</td>
+            <td style="display:flex; gap:0.4rem; flex-wrap:wrap;"><button class="btn-sm btn-info" onclick="viewStudentProfileAdmin('${s.usuario}')">Ver Perfil / Reportes</button><button class="btn-sm btn-del" onclick="deleteStudent('${s.usuario}', '${s.nombre.replace(/'/g, "")}')">Dar de Baja</button></td>
+          </tr>
+        `;
+      }).join("");
     }
 
     async function deleteStudent(usuario, nombre) {
@@ -1253,6 +1496,55 @@
       try {
         const res = await callAPI({ action: "delete_student", adminAuth: state.creds, usuario });
         if (res.ok) { state.students = res.students || []; saveSession(); renderStudentsTable(); }
+        else alert(res.error || "Error al eliminar.");
+      } catch (err) { alert("Error: " + err.message); }
+    }
+
+    async function registerAsesor() {
+      const nombre = document.getElementById("ase-nombre").value.trim();
+      const correo = document.getElementById("ase-correo").value.trim();
+      const escuela = document.getElementById("ase-escuela").value.trim();
+      const btn = document.getElementById("btn-register-asesor");
+      const alertBox = document.getElementById("ase-cred-alert");
+
+      if (!nombre || !correo || !escuela) { alert("Completa todos los campos del asesor."); return; }
+
+      btn.disabled = true; btn.textContent = "Registrando..."; alertBox.style.display = "none";
+      try {
+        const res = await callAPI({ action: "register_asesor", adminAuth: state.creds, data: { nombre, correo, escuela } });
+        if (!res.ok) { alert(res.error || "No se pudo registrar."); return; }
+        state.asesores = res.asesores || [];
+        saveSession();
+        renderAsesoresTable();
+        const c = res.created;
+        alertBox.innerHTML = `<strong>¡Asesor registrado!</strong><br>Usuario: <strong>${c.usuario}</strong> &nbsp;|&nbsp; Contraseña: <strong>${c.password}</strong><br><small>${res.emailSent ? "Correo enviado automáticamente a " + c.correo : "Registro guardado, error en correo: " + res.emailError}</small>`;
+        alertBox.style.display = "block";
+        document.getElementById("ase-nombre").value = ""; document.getElementById("ase-correo").value = ""; document.getElementById("ase-escuela").value = "";
+      } catch (err) { alert("Error: " + err.message); }
+      finally { btn.disabled = false; btn.textContent = "Registrar Asesor y Enviar Accesos"; }
+    }
+
+    function renderAsesoresTable() {
+      const q = (document.getElementById("search-asesor").value || "").toLowerCase();
+      const filtered = state.asesores.filter(a => a.nombre.toLowerCase().includes(q) || a.usuario.toLowerCase().includes(q) || a.escuela.toLowerCase().includes(q));
+      document.getElementById("asesores-count").textContent = state.asesores.length;
+      const tbody = document.getElementById("asesores-tbody");
+      if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:1.2rem;">No hay docentes o asesores registrados todavía.</td></tr>`; return; }
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td><div style="display:flex; align-items:center; gap:0.6rem;"><div class="avatar-sm" style="width:32px; height:32px; font-size:0.72rem;">${a.foto ? `<img src="${a.foto}" />` : getInitials(a.nombre)}</div><div><strong>${a.nombre}</strong><br><small style="color:var(--text-muted);">${a.correo}</small></div></div></td>
+          <td><strong>${a.usuario}</strong></td>
+          <td><span class="pill-tag">${a.escuela}</span></td>
+          <td style="display:flex; gap:0.4rem; flex-wrap:wrap;"><button class="btn-sm btn-info" onclick="viewAsesorProfileAdmin('${a.usuario}')">Ver Perfil</button><button class="btn-sm btn-del" onclick="deleteAsesor('${a.usuario}', '${a.nombre.replace(/'/g, "")}')">Dar de Baja</button></td>
+        </tr>
+      `).join("");
+    }
+
+    async function deleteAsesor(usuario, nombre) {
+      if (!confirm(`¿Dar de baja al asesor ${nombre} (${usuario})?`)) return;
+      try {
+        const res = await callAPI({ action: "delete_asesor", adminAuth: state.creds, usuario });
+        if (res.ok) { state.asesores = res.asesores || []; saveSession(); renderAsesoresTable(); }
         else alert(res.error || "Error al eliminar.");
       } catch (err) { alert("Error: " + err.message); }
     }
